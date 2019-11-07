@@ -1,0 +1,78 @@
+Id, PostTypeId, AcceptedAnswerId, ParentId, CreationDate, DeletionDate, Score, ViewCount, OwnerUserId, OwnerDisplayName, LastEditorUserId, LastEditorDisplayName, LastEditDate, LastActivityDate, AnswerCount, CommentCount, FavoriteCount, ClosedDate, CommunityOwnedDate
+
+B = FOREACH A GENERATE REPLACE(REPLACE(REPLACE(REPLACE(line,'\\n',''),'\\r',''),'\\r\\n',''),'<br>','');
+
+/home/sujith_galla3/sampleout2/part-m-00000
+
+
+temp  = LOAD 'QueryResultssample.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',','YES_MULTILINE') as (ant:int, id:int, score:int,viewcount:int,body:chararray);
+distinct_records  = DISTINCT temp;
+final = FOREACH distinct_records GENERATE ant, id, viewcount, score,  REPLACE(REPLACE(REPLACE(REPLACE(body, '<.*?.>', ''), '\n', ' '),'|',''),',','') AS Body;
+ranked = rank final;
+C = FILTER ranked BY (rank_final > 1);
+D = FOREACH C GENERATE REPLACE($1,'","','|');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+
+temp  = LOAD 'samplecsv.csv' as (blurb:chararray);
+B = FOREACH temp GENERATE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(blurb,'\\n',''),'\\r',''),'\\r\\n',''),'<br>',''),',','');
+ranked = rank B;
+C = FILTER ranked BY (rank_B > 1);
+D = FOREACH C GENERATE REPLACE($1,'""',',');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+dump E;
+rm sampleout2
+store E into 'sampleout2' using PigStorage(',');
+
+temp2  = LOAD 'home/sujith_galla3/sampleout2/part-m-00000' USING PigStorage('|') as (ant:chararray,id:chararray,Score:chararray,Viewcount:chararray,Body:chararray);
+
+temp2
+
+--load and clean files.
+temp1  = LOAD 'QueryResults150-200k.csv' as (blurb:chararray);
+temp2 = LOAD 'QueryResults100-150k.csv' as (blurb:chararray);
+temp3 = LOAD 'QueryResults1-50k.csv' as (blurb:chararray);
+temp4 = LOAD 'QQueryResults50-100k.csv' as (blurb:chararray);
+sub_temp1 = UNION temp1, temp2
+sub_temp2 = UNION temp3,temp4;
+temp = union sub_temp1,sub_temp2;
+dump temp;
+
+temp1  = LOAD 'QueryResults150-200k.csv' as (blurb:chararray);
+B = FOREACH temp1 GENERATE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(blurb,'\\n',''),'\\r',''),'\\r\\n',''),'<*?>',''),',','');
+ranked = rank B;
+C = FILTER ranked BY (rank_B > 1);
+D = FOREACH C GENERATE REPLACE($1,'""',',');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+dump E;
+rm QueryResults4
+store E into 'QueryResults4' ;
+
+temp2 = LOAD 'QueryResults100-150k.csv' as (blurb:chararray);
+B = FOREACH temp2 GENERATE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(blurb,'\\n',''),'\\r',''),'\\r\\n',''),'<br>',''),',','');
+ranked = rank B;
+C = FILTER ranked BY (rank_B > 1);
+D = FOREACH C GENERATE REPLACE($1,'""',',');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+dump E;
+rm QueryResults3
+store E into 'QueryResults3' ;
+
+temp3 = LOAD 'QueryResults1-50k.csv' as (blurb:chararray);
+B = FOREACH temp3 GENERATE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(blurb,'\\n',''),'\\r',''),'\\r\\n',''),'<br>',''),',','');
+ranked = rank B;
+C = FILTER ranked BY (rank_B > 1);
+D = FOREACH C GENERATE REPLACE($1,'""',',');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+dump E;
+rm QueryResults1
+store E into 'QueryResults1' ;
+
+temp4 = LOAD 'QQueryResults50-100k.csv' as (blurb:chararray);
+B = FOREACH temp4 GENERATE REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(blurb,'\\n',''),'\\r',''),'\\r\\n',''),'<br>',''),',','');
+ranked = rank B;
+C = FILTER ranked BY (rank_B > 1);
+D = FOREACH C GENERATE REPLACE($1,'""',',');
+E = FOREACH D GENERATE REPLACE($0,'"','');
+dump E;
+rm QueryResults2
+store E into 'QueryResults2' ;
