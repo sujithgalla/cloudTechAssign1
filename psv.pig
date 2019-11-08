@@ -1,20 +1,12 @@
-temp  = LOAD 'QueryResults1-50k.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',','YES_MULTILINE') as (ant:int, id:int, score:int,viewcount:int,body:chararray);
-temp1 = FOREACH temp GENERATE  ant, id, viewcount, score, REPLACE(body, '<.*?.>',' ') as body;
-temp2 = FOREACH temp1 GENERATE  ant, id, viewcount, score, REPLACE(body, '[^0-9a-zA-Z]+',' ');
-final = FOREACH distinct_records GENERATE ant, id, viewcount, score,  REPLACE(REPLACE(REPLACE(body, '\n', ' '),'|',''),',','') AS Body;
-ranked = rank final;
-C = FILTER ranked BY (rank_final > 49900);
-dump C;
-rm cleaned_data
-STORE final INTO 'cleaned_data' USING org.apache.pig.piggybank.storage.CSVExcelStorage('|','NO_MULTILINE','NOCHANGE','SKIP_OUTPUT_HEADER');
+/* LOAD 4 CSV FILES */
+temp  = LOAD '/sqlBase/*.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',','YES_MULTILINE','NOCHANGE','SKIP_INPUT_HEADER') AS(Id:int, PostTypeId:int, AcceptedAnswerId:int, ParentId:int, CreationDate:datetime, DeletionDate:datetime, Score:int, ViewCount:int, Body:chararray, OwnerUserId:int, OwnerDisplayName:chararray, LastEditorUserId:int, LastEditorDisplayName:chararray, LastEditDate:datetime, LastActivityDate:datetime, Title:chararray, Tags:chararray, AnswerCount:int, CommentCount:int, FavoriteCount:int, ClosedDate:datetime, CommunityOwnedDate:datetime);
 
-[^0-9a-zA-Z]+
+/* remove HTML */
+temp1 = FOREACH temp GENERATE  Id, ViewCount, Score, OwnerUserId, REPLACE(Body, '<.*?.>',' ') as Body;
 
-temp  = LOAD 'QueryResults1-50k.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',','YES_MULTILINE','NOCHANGE','SKIP_INPUT_HEADER') as (ant:int, id:int, score:int,viewcount:int,body:chararray);
-x = FILTER temp by ($0 == 50000);
-dump x;
+/* remove special characters */
+temp2 = FOREACH temp1 GENERATE  Id, ViewCount, Score, OwnerUserId, REPLACE(Body, '[^0-9a-zA-Z]+',' ') as Body;
+temp3 = FOREACH temp2 GENERATE  Id, ViewCount, Score, OwnerUserId, REPLACE(Body, '\\n',' ') as Body;
+dump temp3;
 
-temp  = LOAD 'QueryResults1-50k.csv' USING org.apache.pig.piggybank.storage.CSVExcelStorage(',','YES_MULTILINE','NOCHANGE','SKIP_INPUT_HEADER') as (ant:int, id:int, score:int,viewcount:int,body:chararray);
-grp = GROUP temp ALL;
-grp_all = FOREACH grp GENERATE COUNT(temp);
-dump grp_all;
+STORE temp3 INTO 'final_out_pig' USING org.apache.pig.piggybank.storage.CSVExcelStorage('|','NO_MULTILINE','NOCHANGE','SKIP_OUTPUT_HEADER');
