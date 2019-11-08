@@ -16,4 +16,4 @@ temp2 = FOREACH temp1 GENERATE  Id, ViewCount, Score, OwnerUserId, REPLACE(Body,
 temp3 = FOREACH temp2 GENERATE  Id, ViewCount, Score, OwnerUserId, REPLACE(Body, '\\n',' ') as Body;
 dump temp3;
 
-STORE temp3 INTO 'final_out_pig' USING org.apache.pig.piggybank.storage.CSVExcelStorage('|','NO_MULTILINE','NOCHANGE','SKIP_OUTPUT_HEADER');
+STORE temp3 INTO '/final_out_pig2' USING org.apache.pig.piggybank.storage.CSVExcelStorage('|','NO_MULTILINE','NOCHANGE','SKIP_OUTPUT_HEADER');
